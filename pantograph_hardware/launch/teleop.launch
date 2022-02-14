@@ -1,0 +1,14 @@
+<launch>
+
+<node name="twist_to_vel" pkg="topic_tools" type="transform" 
+    args="--wait-for-start /twist_to_vel_teleop /theta1_controller/command std_msgs/Float64 '500000*m.linear.x'" />
+
+<node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+    <param name="default_topic" value="/twist_to_vel_teleop" />
+    <param name="default_vx_max" value="1.0" />
+    <param name="default_vx_min" value="-1.0" />
+    <param name="default_vy_max" value="1.0" />
+    <param name="default_vy_min" value="-1.0" />
+</node>
+
+</launch>
