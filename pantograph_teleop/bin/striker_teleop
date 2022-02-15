@@ -2,6 +2,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
 
 from pantograph_teleop.kinematics import PantographKinematics
@@ -9,15 +10,32 @@ from pantograph_teleop.kinematics import PantographKinematics
 class StrikerTeleopROS(object):
 
     def __init__(self):
+        self.kinematics = PantographKinematics()
         self.motor_publishers = [
             rospy.Publisher("theta1_dot", Float64, queue_size=1),
             rospy.Publisher("theta4_dot", Float64, queue_size=1)
         ]
         self.twist_subscriber = rospy.Subscriber("cmd_vel", Twist, self.twist_callback)
+        self.jstate_subscriber = rospy.Subscriber("joint_states", JointState, self.jstate_callback)
+        self.jstate = JointState()
 
     def twist_callback(self, twist):
-        self.motor_publishers[0].publish(twist.linear.x)
-        self.motor_publishers[1].publish(twist.angular.z)
+        if twist.linear.x == 0 and twist.angular.z == 0:
+            return
+        q1 = self.jstate.position[0]
+        q4 = self.jstate.position[1]
+        x, y, _, _ = self.kinematics.forward(q1, q4)
+        xdot = twist.linear.x
+        ydot = twist.angular.z
+        _, qdot = self.kinematics.inverse(x, y, xdot, ydot)
+        self.motor_publishers[0].publish(qdot[0])
+        self.motor_publishers[1].publish(qdot[-1])
+
+    def jstate_callback(self, jstate):
+        self.jstate.position = jstate.position
+        self.jstate.velocity = jstate.velocity
         
 if __name__ == '__main__':
-    striker = StrikerTeleopROS()
+    rospy.init_node('pantograph_striker_teleop')
+    teleop = StrikerTeleopROS()
+    rospy.spin()

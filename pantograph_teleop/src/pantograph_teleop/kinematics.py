@@ -20,8 +20,8 @@ class PantographKinematics(object):
 
     def __init__(self, 
                  link_lengths=np.array([0.530, 0.70, 0.70, 0.528]),
-                 table_offset_x = np.array([0.765, 0.825]),
-                 table_offset_y = 0.14):
+                 table_offset_x=np.array([0.765, 0.825]),
+                 table_offset_y=0.14):
         self.link_lengths = link_lengths
         self.table_offset_x = table_offset_x
         self.table_offset_y = table_offset_y

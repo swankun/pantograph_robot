@@ -7,9 +7,10 @@
     <param name="default_vx_min" value="-1.0" />
     <param name="default_vw_min" value="-1.0" />
 </node>
-<node name="joint_teleop" pkg="pantograph_teleop" type="joint_teleop">
+<node name="striker_teleop" pkg="pantograph_teleop" type="striker_teleop">
     <remap from="theta1_dot" to="/pantograph_hardware/theta1_controller/command" />
     <remap from="theta4_dot" to="/pantograph_hardware/theta4_controller/command" />
+    <remap from="joint_states" to="/pantograph_hardware/joint_states" />
 </node>
 
 </launch>
