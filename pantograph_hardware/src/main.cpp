@@ -13,23 +13,6 @@ typedef std::chrono::steady_clock time_source;
 typedef std_srvs::TriggerRequest  ResetReq;
 typedef std_srvs::TriggerResponse ResetRes;
 
-// void controlThread(ros::Rate rate, PantographHW *robot, controller_manager::ControllerManager *cm) 
-// {
-//     time_source::time_point last_time = time_source::now();
-//     while (ros::ok())
-//     {
-//         // Calculate monotonic time elapsed
-//         time_source::time_point this_time = time_source::now();
-//         std::chrono::duration<double> elapsed_duration = this_time - last_time;
-//         ros::Duration elapsed(elapsed_duration.count());
-//         last_time = this_time;
-
-//         robot->read();
-//         cm->update(ros::Time::now(), elapsed);
-//         robot->write();
-//         rate.sleep();
-//     }
-// }
 
 bool resetCb(const ResetReq &req, ResetRes &res, PantographHW* robot)
 {
@@ -49,6 +32,12 @@ bool enableCb(const ResetReq &req, ResetRes &res, PantographHW* robot)
     res.success = true;
     return true;
 }
+bool homeCb(const ResetReq &req, ResetRes &res, PantographHW* robot)
+{
+    robot->home();
+    res.success = true;
+    return true;
+}
 
 
 int main(int argc, char* argv[])
@@ -57,9 +46,10 @@ int main(int argc, char* argv[])
     ros::init(argc, argv, "pantograph_base_node");
 
     // Background thread for the controls .
-    ros::NodeHandle nh("~");
-    PantographHW robot;
-    controller_manager::ControllerManager cm(&robot);
+    ros::NodeHandle nh;
+    ros::NodeHandle cmnh(nh, "pantograph_controller");
+    PantographHW robot(nh);
+    controller_manager::ControllerManager cm(&robot, cmnh);
     ros::AsyncSpinner spinner(3);
 
     // ROS pub/sub/services for main thread
@@ -69,6 +59,8 @@ int main(int argc, char* argv[])
         "disable_motors", boost::bind(disableCb, _1, _2, &robot));
     ros::ServiceServer service_enable = nh.advertiseService<ResetReq,ResetRes>(
         "enable_motors", boost::bind(enableCb, _1, _2, &robot));
+    ros::ServiceServer service_home = nh.advertiseService<ResetReq,ResetRes>(
+        "set_home", boost::bind(homeCb, _1, _2, &robot));
     
     spinner.start();
 

@@ -1,12 +1,14 @@
 <launch>
 
-    <node pkg="pantograph_hardware" required="true" type="pantograph_hardware_node" name="hw_base_node" output="screen" />
+    <!-- Load the hardware parameters -->
+    <rosparam file="$(find pantograph_hardware)/config/hardware.yaml" command="load"/>
+    <node pkg="pantograph_hardware" required="true" type="pantograph_hardware_node" name="pantograph_hardware" output="screen" />
 
     <!-- Load the control parameters -->
     <rosparam file="$(find pantograph_hardware)/config/controllers.yaml" command="load"/>
     
     <!-- Spawn the low-level attitude controllers -->
 	<node name="control" pkg="controller_manager" type="spawner" respawn="false"
-		output="screen" args="joint_state_controller theta1_controller theta4_controller"/>
+		output="screen" ns="pantograph_controller" args="joint_state_controller theta1_controller theta4_controller"/>
 
 </launch>

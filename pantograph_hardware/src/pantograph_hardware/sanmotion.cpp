@@ -3,8 +3,11 @@
 namespace sanmotion_ethercat
 {
 
-EthercatMaster::EthercatMaster(size_t master_id)
+EthercatMaster::EthercatMaster(const size_t master_id, const unsigned int period_ns)
 {
+    period_ns_ = period_ns;
+    frequency_ = NSEC_PER_SEC / period_ns_;
+    
     /* Master configurations */
     master_ptr_ = ecrt_request_master(master_id);
     if (!master_ptr_) { 
@@ -56,7 +59,7 @@ EthercatMaster::~EthercatMaster()
     stop();
     munlockall();
     ecrt_release_master(master_ptr_);
-    printf("\nEtherCAT Master 0 is released.\n");
+    printf("EtherCAT master is released.\n");
 }
 
 
@@ -83,7 +86,7 @@ bool EthercatMaster::is_ready()
 
 void EthercatMaster::run()
 {
-    printf("\nStarting EtherCAT task.\n\n");
+    // printf("\nStarting EtherCAT task.\n\n");
     // printf("** Domain state **\n"); check_domain_state();
     // printf("** Master state **\n"); check_master_state();
     // printf("** Slave states **\n"); check_slave_config_states();
@@ -108,13 +111,13 @@ void EthercatMaster::run()
 
             cyclic_task();
 
-            wakeup_time.tv_nsec += PERIOD_NS;
+            wakeup_time.tv_nsec += period_ns_;
             while (wakeup_time.tv_nsec >= NSEC_PER_SEC) {
                 wakeup_time.tv_nsec -= NSEC_PER_SEC;
                 wakeup_time.tv_sec++;
             }
         } 
-        printf("EtherCAT Task ended.\n");
+        // printf("EtherCAT task ended.\n");
     } );
     std::this_thread::sleep_for(10ms);
 }
@@ -309,13 +312,13 @@ void EthercatMaster::cyclic_task()
     if (task_counter_) {
         task_counter_--;
     } else { 
-        // this block occur at every (n=FREQUENCY) period (1 Hz)
-        task_counter_ = FREQUENCY;
-        // printf("** Domain state **\n"); check_domain_state();
-        // printf("** Master state **\n"); check_master_state();
-        // printf("** Slave states **\n"); check_slave_config_states();
-        // printf("\n");
-        // displayall();
+        // this block occur at every (n=frequency_) period (1 Hz)
+        task_counter_ = frequency_;
+        printf("** Domain state **\n"); check_domain_state();
+        printf("** Master state **\n"); check_master_state();
+        printf("** Slave states **\n"); check_slave_config_states();
+        printf("\n");
+        displayall();
     }
     
     read_data();
@@ -401,17 +404,17 @@ void EthercatMaster::enable_drive(const unsigned int slave_id)
         slave_data_[slave_id].fsa_state == SWITCH_ON_DISABLED_B) {
         /* Need to go to READY_TO_SWITCH_ON then OPERATION_ENABLE */
         set_control_word_shutdown(slave_id);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(PERIOD_NS*10));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(period_ns_*10));
     }
     set_control_word_switchon_enable(slave_id);
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PERIOD_NS*10));
+    std::this_thread::sleep_for(std::chrono::nanoseconds(period_ns_*10));
 }
 
 
 void EthercatMaster::disable_drive(const unsigned int slave_id)
 {
     set_control_word_shutdown(slave_id);
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PERIOD_NS*10));
+    std::this_thread::sleep_for(std::chrono::nanoseconds(period_ns_*10));
 }
 
 
@@ -420,9 +423,9 @@ void EthercatMaster::clear_faults(const unsigned int slave_id)
     if (slave_data_[slave_id].fsa_state == FAULT_A || 
         slave_data_[slave_id].fsa_state == FAULT_B) {
         set_control_word_clear_fault(slave_id);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(PERIOD_NS*10));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(period_ns_*10));
         set_control_word_shutdown(slave_id);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(PERIOD_NS*10));
+        std::this_thread::sleep_for(std::chrono::nanoseconds(period_ns_*10));
     } else {
         disable_drive(slave_id);
     }

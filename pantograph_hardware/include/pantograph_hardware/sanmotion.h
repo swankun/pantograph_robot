@@ -4,8 +4,6 @@
 
 #define PERIOD_NS   (5000000)
 #define MAX_SAFE_STACK (8 * 1024) /* The maximum stack size which is guranteed safe to access without faulting */
-
-/* Constants */
 #define NSEC_PER_SEC (1000000000)
 #define FREQUENCY (NSEC_PER_SEC / PERIOD_NS)
 #define SANMOTION_ID 0x000001b9, 0x00000006
@@ -153,7 +151,7 @@ class EthercatMaster
 {
 
 public:
-    EthercatMaster(size_t master_index);
+    EthercatMaster(const size_t master_index, const unsigned int period_ns=PERIOD_NS);
     ~EthercatMaster();
     
     bool is_ready();
@@ -204,6 +202,7 @@ private:
     ec_domain_t *domain_ptr_ = NULL;
     uint8_t *domain_pd_ = NULL;
 
+    unsigned int period_ns_, frequency_;
     unsigned int task_counter_ = 0;
     std::thread cyclic_worker_;
 
@@ -227,7 +226,7 @@ private:
 
     struct
     {
-        uint16_t    control_word = ~(~0u << 2) << 1;
+        uint16_t    control_word = ~(~0u << 2) << 1; /* 0001_1111 */
         op_mode_t   op_mode = MODE_NOOP;
         int32_t     target_position = 0;
         uint32_t    profile_velocity = 0xFFFFFFFF;

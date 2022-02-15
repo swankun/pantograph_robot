@@ -1,6 +1,7 @@
 #ifndef PANTOGRAPH_HARDWARE_INTERFACE_H
 #define PANTOGRAPH_HARDWARE_INTERFACE_H
 
+#include <algorithm>
 #include <boost/assign.hpp>
 #include <thread>
 
@@ -19,13 +20,15 @@ using namespace std::literals::chrono_literals;
 class PantographHW : public hardware_interface::RobotHW 
 {
     public:
-        PantographHW();
+        PantographHW(ros::NodeHandle &nh);
         ~PantographHW();
+        bool init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh);
         void read();
         void write();
         void reset();
         void enable();
         void disable();
+        void home();
 
     protected:
 
@@ -62,7 +65,9 @@ class PantographHW : public hardware_interface::RobotHW
         }
         raw_joint_[2];
 
-        double encoder_ppr_ = 1.0, torque_constant_ = 1.0;
+        const double encoder_ppr_, gear_ratio_, torque_constant_;
+        double pulses_to_rad_=0.0;
+        double home_pulses_[2] = {0, 0};
 
     private:
         std::unique_ptr<EthercatMaster> ecat_master_;

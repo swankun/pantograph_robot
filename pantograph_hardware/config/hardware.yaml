@@ -1,0 +1,7 @@
+pantograph_hardware:
+  ethercat_master_id: 0 # [default: 0]
+  ethercat_cycle_period_ns: 5000000 # [default: 5000000, 10^9 divide by this number must be an integer]
+  joint_max_accel: 20 # [default: 50.0]
+  joint_max_decel: 20 # [default: 50.0]
+  set_home_on_startup: true # [default: true]
+  enable_on_startup: false # [default: false]
