@@ -2,8 +2,17 @@
 
 import numpy as np
 from pantograph_perception.puck_detection import PuckDetection
+import rospy
+
+class PantographPerception(object):
+    def __init__(self):
+        self.puck_detector = PuckDetection()
+
+    def update_image(self, msg):
+        # whatever
+
 
 if __name__ == '__main__':
     rospy.init_node('pantograph_perception')
-    # teleop = StrikerTeleopROS()
+    # obj = PantographPerception()
     rospy.spin()

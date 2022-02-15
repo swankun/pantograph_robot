@@ -5,6 +5,5 @@ class PuckDetection(object):
     def __init__(self):
         self.attr1 = 0
 
-    def do_something(self):
+    def do_something(self, input_image):
         # whatever
-        
