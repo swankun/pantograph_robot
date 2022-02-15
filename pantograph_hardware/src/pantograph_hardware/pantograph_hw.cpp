@@ -146,7 +146,7 @@ void PantographHW::home()
         std::this_thread::sleep_for(1s);
         counter++;
     }
-    if (counter >= 5) 
+    if (counter >= 10) 
     {
         ROS_WARN("[pantograph_hardware] Unable to set zero position.");
     }
