@@ -65,7 +65,7 @@ EthercatMaster::~EthercatMaster()
 
 void EthercatMaster::stop()
 {
-    for (int slave_id=0; slave_id<1; slave_id++) {
+    for (int slave_id=0; slave_id<2; slave_id++) {
         set_target_position(slave_id, slave_data_[slave_id].actual_position);
         set_target_velocity(slave_id, 0);
         set_target_torque(slave_id, 0);
