@@ -43,30 +43,32 @@ bool homeCb(const ResetReq &req, ResetRes &res, PantographHW* robot)
 int main(int argc, char* argv[])
 {
     // Initialize ROS node.
-    ros::init(argc, argv, "pantograph_base_node");
+    ros::init(argc, argv, "pantograph_hardware");
 
     // Background thread for the controls .
-    ros::NodeHandle nh;
-    ros::NodeHandle cmnh(nh, "pantograph_controller");
+    ros::NodeHandle nh("~");
+    ros::NodeHandle hwnh(nh, "motor_drivers");
     PantographHW robot(nh);
-    controller_manager::ControllerManager cm(&robot, cmnh);
+    controller_manager::ControllerManager cm(&robot, nh);
     ros::AsyncSpinner spinner(3);
 
+    // ROS params
+    const unsigned int control_loop_rate(nh.param("control_loop_rate_hz", 100)); 
+    ROS_INFO("[pantograph_hardware] Control loop rate: %u Hz", control_loop_rate);
+
     // ROS pub/sub/services for main thread
-    ros::ServiceServer service_reset = nh.advertiseService<ResetReq,ResetRes>(
-        "clear_motor_faults", boost::bind(resetCb, _1, _2, &robot));
-    ros::ServiceServer service_disable = nh.advertiseService<ResetReq,ResetRes>(
-        "disable_motors", boost::bind(disableCb, _1, _2, &robot));
-    ros::ServiceServer service_enable = nh.advertiseService<ResetReq,ResetRes>(
-        "enable_motors", boost::bind(enableCb, _1, _2, &robot));
-    ros::ServiceServer service_home = nh.advertiseService<ResetReq,ResetRes>(
+    ros::ServiceServer service_reset = hwnh.advertiseService<ResetReq,ResetRes>(
+        "clear_faults", boost::bind(resetCb, _1, _2, &robot));
+    ros::ServiceServer service_disable = hwnh.advertiseService<ResetReq,ResetRes>(
+        "disable", boost::bind(disableCb, _1, _2, &robot));
+    ros::ServiceServer service_enable = hwnh.advertiseService<ResetReq,ResetRes>(
+        "enable", boost::bind(enableCb, _1, _2, &robot));
+    ros::ServiceServer service_home = hwnh.advertiseService<ResetReq,ResetRes>(
         "set_home", boost::bind(homeCb, _1, _2, &robot));
     
     spinner.start();
-
-    // std::thread(std::bind(controlThread, ros::Rate(50), &robot, &cm));
     time_source::time_point last_time = time_source::now();
-    ros::Rate rate(50);
+    ros::Rate rate(control_loop_rate);
     while (ros::ok())
     {
         // Calculate monotonic time elapsed

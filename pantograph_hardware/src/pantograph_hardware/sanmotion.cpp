@@ -314,11 +314,11 @@ void EthercatMaster::cyclic_task()
     } else { 
         // this block occur at every (n=frequency_) period (1 Hz)
         task_counter_ = frequency_;
-        printf("** Domain state **\n"); check_domain_state();
-        printf("** Master state **\n"); check_master_state();
-        printf("** Slave states **\n"); check_slave_config_states();
-        printf("\n");
-        displayall();
+        // printf("** Domain state **\n"); check_domain_state();
+        // printf("** Master state **\n"); check_master_state();
+        // printf("** Slave states **\n"); check_slave_config_states();
+        // printf("\n");
+        // displayall();
     }
     
     read_data();

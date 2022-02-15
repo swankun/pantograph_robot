@@ -1,7 +1,7 @@
 <launch>
 
 <node name="twist_to_vel" pkg="topic_tools" type="transform" 
-    args="--wait-for-start /twist_to_vel_teleop /pantograph_controller/theta1_controller/command std_msgs/Float64 'm.linear.x'" />
+    args="--wait-for-start /twist_to_vel_teleop /pantograph_hardware/theta1_controller/command std_msgs/Float64 'm.linear.x'" />
 
 <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
     <param name="default_topic" value="/twist_to_vel_teleop" />

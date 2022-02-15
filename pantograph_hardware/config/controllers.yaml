@@ -1,12 +1,11 @@
-pantograph_controller:
-  joint_state_controller:
-    type: "joint_state_controller/JointStateController"
-    publish_rate: 50
+joint_state_controller:
+  type: "joint_state_controller/JointStateController"
+  publish_rate: 50
 
-  theta1_controller:
-    type: "velocity_controllers/JointVelocityController"
-    joint: "theta1"
+theta1_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: "theta1"
 
-  theta4_controller:
-    type: "velocity_controllers/JointVelocityController"
-    joint: "theta4"
+theta4_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: "theta4"

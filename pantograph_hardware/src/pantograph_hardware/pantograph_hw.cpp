@@ -9,7 +9,7 @@ PantographHW::PantographHW(ros::NodeHandle &nh) :
 {
     pulses_to_rad_ = encoder_ppr_*gear_ratio_/(2.0 * M_PI);
     
-    ros::NodeHandle hwnh(nh, "pantograph_hardware");
+    ros::NodeHandle hwnh(nh, "motor_drivers");
     const unsigned int ecat_master_id(hwnh.param("ethercat_master_id", 0)); 
     ROS_INFO("[pantograph_hardware] EtherCAT master id: %u", ecat_master_id);
     const unsigned int ecat_cycle_period(hwnh.param("ethercat_cycle_period_ns", 5000000)); 
@@ -52,10 +52,10 @@ bool PantographHW::init(ros::NodeHandle &root_nh, ros::NodeHandle &robot_hw_nh)
     ROS_INFO("[pantograph_hardware] Max joint acceleration = %.1f rad/s^2", max_accel);
     const double max_decel(robot_hw_nh.param("joint_max_decel", 50)); /* rad/s^2 */
     ROS_INFO("[pantograph_hardware] Max joint deceleration = %.1f rad/s^2", max_decel);
-    const bool do_home(robot_hw_nh.param("set_home_on_startup", true)); 
-    ROS_INFO("[pantograph_hardware] Set home on startup: %s", do_home ? "true" : "false");
+    const bool do_home(robot_hw_nh.param("zero_position_on_startup", true)); 
+    ROS_INFO("[pantograph_hardware] Set zero position on startup: %s", do_home ? "true" : "false");
     const bool do_enable(robot_hw_nh.param("enable_on_startup", false)); 
-    ROS_INFO("[pantograph_hardware] Enable motors on startup: %s", do_home ? "true" : "false");
+    ROS_INFO("[pantograph_hardware] Enable motors on startup: %s", do_enable ? "true" : "false");
 
     if (do_home) { home(); }
 
@@ -130,9 +130,9 @@ void PantographHW::home()
     std::copy(std::begin(home_pulses_), std::end(home_pulses_), std::begin(old_home_pulses));
 
     int counter = 0;
-    while (counter < 5)
+    while (counter < 10)
     {
-        ROS_INFO("[pantograph_hardware] Waiting for home...");
+        ROS_INFO("[pantograph_hardware] Waiting for position updates...");
         for (unsigned int i=0; i<2; i++)
         {
             read();
@@ -148,7 +148,7 @@ void PantographHW::home()
     }
     if (counter >= 5) 
     {
-        ROS_WARN("[pantograph_hardware] Unable to set home position.");
+        ROS_WARN("[pantograph_hardware] Unable to set zero position.");
     }
     
 }
