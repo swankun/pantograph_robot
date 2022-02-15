@@ -10,14 +10,14 @@ class StrikerTeleopROS(object):
 
     def __init__(self):
         self.motor_publishers = [
-            rospy.Publisher("theta1_dot", Float64, queue_size=1,
-            rospy.Publisher("theta4_dot", Float64, queue_size=1
+            rospy.Publisher("theta1_dot", Float64, queue_size=1),
+            rospy.Publisher("theta4_dot", Float64, queue_size=1)
         ]
         self.twist_subscriber = rospy.Subscriber("cmd_vel", Twist, self.twist_callback)
 
-    def twist_callback(self, msg):
-        vx = msg.linear.x
-        vy = msg.linear.y
+    def twist_callback(self, twist):
+        self.motor_publishers[0].publish(twist.linear.x)
+        self.motor_publishers[1].publish(twist.angular.z)
         
 if __name__ == '__main__':
     striker = StrikerTeleopROS()

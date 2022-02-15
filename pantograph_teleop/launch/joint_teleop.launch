@@ -1,14 +1,15 @@
 <launch>
 
-<node name="twist_to_vel" pkg="topic_tools" type="transform" 
-    args="--wait-for-start /twist_to_vel_teleop /pantograph_hardware/theta1_controller/command std_msgs/Float64 'm.linear.x'" />
-
 <node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
-    <param name="default_topic" value="/twist_to_vel_teleop" />
+    <param name="default_topic" value="/cmd_vel" />
     <param name="default_vx_max" value="1.0" />
+    <param name="default_vw_max" value="1.0" />
     <param name="default_vx_min" value="-1.0" />
-    <param name="default_vy_max" value="1.0" />
-    <param name="default_vy_min" value="-1.0" />
+    <param name="default_vw_min" value="-1.0" />
+</node>
+<node name="striker_teleop" pkg="pantograph_teleop" type="striker_teleop">
+    <remap from="theta1_dot" to="/pantograph_hardware/theta1_controller/command" />
+    <remap from="theta4_dot" to="/pantograph_hardware/theta4_controller/command" />
 </node>
 
 </launch>
