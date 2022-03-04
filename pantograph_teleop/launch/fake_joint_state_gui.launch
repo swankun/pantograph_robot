@@ -1,0 +1,17 @@
+<launch>
+
+<include file="$(find pantograph_description)/launch/load.launch" />
+
+<node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="fictitious_joint_state_publisher">
+    <param name="rate" value="10"/>
+    <remap from="joint_states" to="/pantograph_hardware/joint_states" />
+</node>
+
+<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <rosparam param="publish_frequency">5</rosparam>
+    <remap from="/joint_states" to="/pantograph_hardware/joint_states" />
+</node>
+
+<node name="$(anon rviz)" pkg="rviz" type="rviz" respawn="false" args="-d $(find pantograph_teleop)/config/default.rviz" output="screen"/>
+
+</launch>

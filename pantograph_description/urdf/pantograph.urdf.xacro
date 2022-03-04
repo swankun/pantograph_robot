@@ -1,0 +1,226 @@
+<?xml version="1.0"?>
+
+<robot name="pantograph" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<!-- Constants for robot dimensions -->
+	<xacro:property name="PI" value="3.1415926535897931"/>
+	<xacro:property name="DEG2RAD" value="0.017453292519943295"/>
+
+    <!-- Kinematics parameters -->
+    <xacro:property name="base_separation" value="1.2" />
+    <xacro:property name="link_length_1" value="0.5" />
+    <xacro:property name="link_length_2" value="0.4" />
+    <xacro:property name="link_length_3" value="0.4" />
+    <xacro:property name="link_length_4" value="0.5" />
+
+    <!-- Link 1 geometry and inertial parameters -->
+    <xacro:property name="link_mass_1" value="0.3" />
+	<xacro:property name="link_width_1" value="0.02" />
+	<xacro:property name="link_height_1" value="0.005" />
+
+    <!-- Link 2 geometry and inertial parameters -->
+    <xacro:property name="link_mass_2" value="0.3" />
+	<xacro:property name="link_width_2" value="0.02" />
+	<xacro:property name="link_height_2" value="0.005" />
+    
+    <!-- Link 3 geometry and inertial parameters -->
+    <xacro:property name="link_mass_3" value="0.3" />
+	<xacro:property name="link_width_3" value="0.02" />
+	<xacro:property name="link_height_3" value="0.005" />
+    
+    <!-- Link 4 geometry and inertial parameters -->
+    <xacro:property name="link_mass_4" value="0.3" />
+	<xacro:property name="link_width_4" value="0.02" />
+	<xacro:property name="link_height_4" value="0.005" />
+
+    <!-- Striker geometry -->
+	<xacro:property name="stricker_mass" value="0.1" /> <!-- mass of a single wheel -->
+	<xacro:property name="stricker_radius" value="0.05" /> <!-- radius of the wheels -->
+	<xacro:property name="stricker_height" value="0.05" /> <!-- thickness of the wheels -->
+
+    <!-- Other parameters -->
+	<xacro:property name="joint_damping" value="0.1" /> <!-- damping of all joints -->
+
+	<!-- Import Rviz colors -->
+	<xacro:include filename="$(find pantograph_description)/urdf/materials.xacro" />
+
+
+    <!-- Left two-link manipulator -->
+    <link name="world" />
+    <joint name="ground_joint" type="fixed">
+		<parent link="world"/>
+		<child link="base_link"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+	</joint>
+    <link name="base_link" />
+
+    <link name="left_link_1">
+    	<collision>
+			<origin xyz="0 ${link_length_1/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_1} ${link_length_1} ${link_height_1}"/>
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 ${link_length_1/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_1} ${link_length_1} ${link_height_1}"/>
+			</geometry>
+			<material name="orange"/>
+		</visual>
+		<inertial>
+			<origin xyz="0 ${link_length_1/2} 0" rpy="0 0 0"/>
+			<mass value="${link_mass_1}"/>
+			<inertia ixx="${link_mass_1 / 12.0 * (link_length_1*link_length_1 + link_height_1*link_height_1)}" ixy="0.0" ixz="0.0"
+					 iyy="${link_mass_1 / 12.0 * (link_width_1*link_width_1 + link_height_1*link_height_1)}" iyz="0.0"
+					 izz="${link_mass_1 / 12.0 * (link_length_1*link_length_1 + link_width_1*link_width_1)}"/>
+		</inertial>
+	</link>
+    <joint name="theta1" type="continuous">
+		<origin xyz="0 ${base_separation/2} 0" rpy="0 0 ${-PI}"/>
+		<parent link="world"/>
+		<child link="left_link_1"/>
+        <axis xyz="0 0 1" />
+	</joint>
+
+    <link name="left_link_2">
+    	<collision>
+			<origin xyz="0 ${link_length_2/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_2} ${link_length_2} ${link_height_2}"/>
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 ${link_length_2/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_2} ${link_length_2} ${link_height_2}"/>
+			</geometry>
+			<material name="orange"/>
+		</visual>
+		<inertial>
+			<origin xyz="0 ${link_length_2/2} 0" rpy="0 0 0"/>
+			<mass value="${link_mass_2}"/>
+			<inertia ixx="${link_mass_2 / 12.0 * (link_length_2*link_length_2 + link_height_2*link_height_2)}" ixy="0.0" ixz="0.0"
+					 iyy="${link_mass_2 / 12.0 * (link_width_2*link_width_2 + link_height_2*link_height_2)}" iyz="0.0"
+					 izz="${link_mass_2 / 12.0 * (link_length_2*link_length_2 + link_width_2*link_width_2)}"/>
+		</inertial>
+	</link>
+    <joint name="theta2" type="continuous">
+        <origin xyz="0 ${link_length_1} ${link_height_1+link_height_2}" rpy="0 0 0"/>
+		<parent link="left_link_1"/>
+		<child link="left_link_2"/>
+		<axis xyz="0 0 1" />
+	</joint>
+
+    <!-- Right two-link manipulator -->
+    <link name="right_link_1">
+    	<collision>
+			<origin xyz="0 ${link_length_4/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_4} ${link_length_4} ${link_height_4}"/>
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 ${link_length_4/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_4} ${link_length_4} ${link_height_4}"/>
+			</geometry>
+			<material name="orange"/>
+		</visual>
+		<inertial>
+			<origin xyz="0 ${link_length_4/2} 0" rpy="0 0 0"/>
+			<mass value="${link_mass_4}"/>
+			<inertia ixx="${link_mass_4 / 12.0 * (link_length_4*link_length_4 + link_height_4*link_height_4)}" ixy="0.0" ixz="0.0"
+					 iyy="${link_mass_4 / 12.0 * (link_width_4*link_width_4 + link_height_4*link_height_4)}" iyz="0.0"
+					 izz="${link_mass_4 / 12.0 * (link_length_4*link_length_4 + link_width_4*link_width_4)}"/>
+		</inertial>
+	</link>
+    <joint name="theta4" type="continuous">
+		<origin xyz="0 ${-base_separation/2} 0" rpy="0 0 ${PI}"/>
+		<parent link="world"/>
+		<child link="right_link_1"/>
+        <axis xyz="0 0 1" />
+	</joint>
+
+    <link name="right_link_2">
+    	<collision>
+			<origin xyz="0 ${link_length_3/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_3} ${link_length_3} ${link_height_3}"/>
+			</geometry>
+		</collision>
+		<visual>
+			<origin xyz="0 ${link_length_3/2} 0" rpy="0 0 0"/>
+			<geometry>
+				<box size="${link_width_3} ${link_length_3} ${link_height_3}"/>
+			</geometry>
+			<material name="orange"/>
+		</visual>
+		<inertial>
+			<origin xyz="0 ${link_length_3/2} 0" rpy="0 0 0"/>
+			<mass value="${link_mass_3}"/>
+			<inertia ixx="${link_mass_3 / 12.0 * (link_length_3*link_length_3 + link_height_3*link_height_3)}" ixy="0.0" ixz="0.0"
+					 iyy="${link_mass_3 / 12.0 * (link_width_3*link_width_3 + link_height_3*link_height_3)}" iyz="0.0"
+					 izz="${link_mass_3 / 12.0 * (link_length_3*link_length_3 + link_width_3*link_width_3)}"/>
+		</inertial>
+	</link>
+    <joint name="theta3" type="continuous">
+        <origin xyz="0 ${link_length_4} ${link_height_3+link_height_4}" rpy="0 0 0"/>
+		<parent link="right_link_1"/>
+		<child link="right_link_2"/>
+		<axis xyz="0 0 1" />
+	</joint>
+
+
+    <!-- Striker -->
+    <link name="striker_link">
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<cylinder radius="${stricker_radius}" length="${stricker_height}"/>
+			</geometry>
+		</collision>
+		<visual>
+  			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<cylinder radius="${stricker_radius}" length="${stricker_height}"/>
+			</geometry>
+			<material name="blue"/>
+		</visual>
+		<inertial>
+  			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<mass value="${stricker_mass}"/>
+			<inertia ixx="${stricker_mass / 12.0 * (3*stricker_radius*stricker_radius + stricker_height*stricker_height)}" ixy="0.0" ixz="0.0"
+					 iyy="${stricker_mass / 12.0 * (3*stricker_radius*stricker_radius + stricker_height*stricker_height)}" iyz="0.0"
+					 izz="${stricker_mass / 2.0 * stricker_radius * stricker_radius}"/>
+		</inertial>
+	</link>
+    <joint name="stricker_joint" type="fixed">
+        <origin xyz="0 ${link_length_2} 0" rpy="0 0 0"/>
+		<parent link="left_link_2"/>
+		<child link="striker_link"/>
+		<axis xyz="0 0 1" />
+	</joint>
+
+
+    <!-- For ros_control -->
+	<transmission name="theta1_trans">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="theta1">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="theta1_mot">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+    <transmission name="theta4_trans">
+		<type>transmission_interface/SimpleTransmission</type>
+		<joint name="theta4">
+			<hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+		</joint>
+		<actuator name="theta4_mot">
+			<mechanicalReduction>1</mechanicalReduction>
+		</actuator>
+	</transmission>
+
+</robot>
